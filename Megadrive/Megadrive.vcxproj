@@ -62,18 +62,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeBuildCommandLine>$(GDK)/bin/make -f $(GDK)/makefile.gen</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>
+$(GDK_WIN)\bin\make -f $(GDK_WIN)\makefile.gen</NMakeBuildCommandLine>
     <NMakeOutput>
     </NMakeOutput>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <IncludePath>$(GDK)\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(GDK_WIN)\res;$(GDK_WIN)\inc;$(IncludePath)</IncludePath>
+    <SourcePath>$(GDK_WIN)\src;$(VC_SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeBuildCommandLine>$(GDK)/bin/make -f $(GDK)/makefile.gen</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>
+$(GDK_WIN)\bin\make -f $(GDK_WIN)\makefile.gen</NMakeBuildCommandLine>
     <NMakeOutput>
     </NMakeOutput>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <IncludePath>$(GDK)\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(GDK_WIN)\res;$(GDK_WIN)\inc;$(IncludePath)</IncludePath>
+    <SourcePath>$(GDK_WIN)\src;$(VC_SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(GDK)\inc;$(IncludePath)</IncludePath>
