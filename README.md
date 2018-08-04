@@ -11,5 +11,5 @@ My version of game "Snake" written in C that compiles into a SEGA Mega Drive (Ge
 * Load `rom.bin` in the emulator of your choice.
 
 ## Uses:
-* [SGDK v1.12 library](https://github.com/Stephane-D/SGDK) (commit #dbb41818).
+* [SGDK v1.34 library](https://github.com/Stephane-D/SGDK).
 * Tested in Kega Fusion and Gens.

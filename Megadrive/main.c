@@ -6,7 +6,7 @@
 
 #include "moon.h"
 
-#define TILE1	1
+#define TILE1   1
 
 //const u32 tile[8] =
 //{
@@ -93,7 +93,8 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 				break;
 			}
 		}
-		else if (changed) {
+		
+        if (changed) {
 			switch (changed) {
 			case BUTTON_UP:
 				//direction = up;
@@ -128,26 +129,26 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 	}
 }
 
-void steerSnake(SpriteDef *snakeSprite) {
+void steerSnake(VDPSprite *snakeSprite) {
 	JOY_update();
 	//if (steer==direction)
 	
 	if (count > 5) {
 		switch (steer) {
 		case up:
-			snakeSprite->posy = snakeSprite->posy - 8;
+			snakeSprite->y = snakeSprite->y - 8;
 			direction = up;
 			break;
 		case down:
-			snakeSprite->posy = snakeSprite->posy + 8;
+			snakeSprite->y = snakeSprite->y + 8;
 			direction = down;
 			break;
 		case left:
-			snakeSprite->posx = snakeSprite->posx - 8;
+			snakeSprite->x = snakeSprite->x - 8;
 			direction = left;
 			break;
 		case right:
-			snakeSprite->posx = snakeSprite->posx + 8;
+			snakeSprite->x = snakeSprite->x + 8;
 			direction = right;
 			break;
 		}
@@ -166,14 +167,14 @@ int main()
 	//load the tile in VRAM (check it using GensKMod CPU>Debug>Genesis>VDP)
 	VDP_loadTileData((const u32 *)tile, TILE1, 1, 0);
 
-	SpriteDef snakeSprite;
-	snakeSprite.posx = 128 + screenWidth / 2;
-	snakeSprite.posy = 128 + screenHeight / 2;
+	VDPSprite snakeSprite;
+	snakeSprite.x = 128 + screenWidth / 2;
+	snakeSprite.y = 128 + screenHeight / 2;
 	snakeSprite.size = SPRITE_SIZE(1, 1);
-	snakeSprite.tile_attr = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE1);
+	snakeSprite.attribut = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE1);
 	snakeSprite.link = 0;
 
-	VDP_fillTileMapRect(BPLAN, TILE_ATTR_FULL(PAL0, 1, 0, 0, TILE1), 0, 0, 64, 64);
+	VDP_fillTileMapRect(PLAN_B, TILE_ATTR_FULL(PAL0, 1, 0, 0, TILE1), 0, 0, 64, 64);
 
 	while (1)
 	{
@@ -183,9 +184,11 @@ int main()
 		//update score
 		//draw current screen (logo, start screen, settings, game, gameover, credits...)
 
-		//snakeSprite.posy--;
+		//snakeSprite.y--;
 		steerSnake(&snakeSprite);
-		VDP_setSpriteP(0, &snakeSprite);
+		VDP_setSprite(0, snakeSprite.x, snakeSprite.y, snakeSprite.size, snakeSprite.attribut);
+
+        //VDP_setSpritePosition()
 
 		//textofdirection = (char) direction;
 		char textofdirection[1];
@@ -197,7 +200,7 @@ int main()
 		VDP_drawText("test000", 10, 9);
 		VDP_drawText(textofdirection, 10, 10);
 
-		VDP_updateSprites();
+		VDP_updateSprites(1, TRUE);
 
 		//wait for screen refresh
 		VDP_waitVSync();
