@@ -160,8 +160,6 @@ void steerSnake(VDPSprite *snakeSprite) {
 
 int main()
 {
-
-	JOY_init();
 	JOY_setEventHandler(&myJoyHandler);
 
 	//load the tile in VRAM (check it using GensKMod CPU>Debug>Genesis>VDP)
