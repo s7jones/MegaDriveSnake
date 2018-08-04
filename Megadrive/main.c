@@ -8,18 +8,6 @@
 
 #define TILE1   1
 
-//const u32 tile[8] =
-//{
-//	0x00111100,
-//	0x01144110,
-//	0x11244211,
-//	0x11244211,
-//	0x11222211,
-//	0x11222211,
-//	0x01122110,
-//	0x00111100
-//};
-
 const u32 tile[8] =
 {
 	0x44444444,
@@ -34,14 +22,14 @@ const u32 tile[8] =
 
 const u32 tile2[8] =
 {
-	0x44444444,
-	0x44444444,
-	0x44444444,
-	0x44444444,
-	0x44444444,
-	0x44444444,
-	0x44444444,
-	0x44444444
+    0x00111100,
+    0x01144110,
+    0x11244211,
+    0x11244211,
+    0x11222211,
+    0x11222211,
+    0x01122110,
+    0x00111100
 };
 
 typedef struct {
@@ -61,71 +49,66 @@ u16 steer = 0;
 void myJoyHandler(u16 joy, u16 changed, u16 state)
 {
 	if (joy == JOY_1) {
-		u32 len;
-		if (state) {
-			switch (state) {
-			case BUTTON_UP:
-				if (direction != down) {
-					steer = up;
-				}
-				VDP_drawText("up", 0, 0);
-				break;
+        if (state & BUTTON_UP)
+        {
+            if (direction != down) {
+                steer = up;
+            }
+            VDP_drawText("up", 0, 0);
+        }
+        // maybe this could else if? is callback for each button state/change?
+        if (state & BUTTON_DOWN)
+        {
+            if (direction != up) {
+                steer = down;
+            }
+            VDP_drawText("down", 0, 1);
+        }
+        if (state & BUTTON_LEFT)
+        {
+            if (direction != right) {
+                steer = left;
+            }
+            VDP_drawText("left", 0, 2);
+        }
+        if (state & BUTTON_RIGHT)
+        {
+            if (direction != left) {
+                steer = right;
+            }
+            VDP_drawText("right", 0, 3);
+        }
 
-			case BUTTON_DOWN:
-				if (direction != up) {
-					steer = down;
-				}
-				VDP_drawText("down", 0, 1);
-				break;
+        // maybe this could be constexpr?
+        u32 len;
 
-			case BUTTON_LEFT:
-				if (direction != right) {
-					steer = left;
-				}
-				VDP_drawText("left", 0, 2);
-				break;
+        if (changed & ~state & BUTTON_UP)
+        {
+            VDP_drawText("up", 0, 4);
+            len = strlen("up");
+            VDP_clearText(0, 0, len);
+        }
+        // maybe this could else if? is callback for each button state/change?
+        if (changed & ~state & BUTTON_DOWN)
+        {
+            VDP_drawText("down", 0, 5);
+            len = strlen("down");
+            VDP_clearText(0, 1, len);
+        }
 
-			case BUTTON_RIGHT:
-				if (direction != left) {
-					steer = right;
-				}
-				VDP_drawText("right", 0, 3);
-				break;
-			}
-		}
-		
-        if (changed) {
-			switch (changed) {
-			case BUTTON_UP:
-				//direction = up;
-				VDP_drawText("up", 0, 4);
-				len = strlen("up");
-				VDP_clearText(0, 0, len);
-				break;
+        if (changed & ~state & BUTTON_LEFT)
+        {
+            VDP_drawText("left", 0, 6);
+            len = strlen("left");
+            VDP_clearText(0, 2, len);
+        }
 
-			case BUTTON_DOWN:
-				//direction = down;
-				VDP_drawText("down", 0, 5);
-				len = strlen("down");
-				VDP_clearText(0, 1, len);
-				break;
-
-			case BUTTON_LEFT:
-				//direction = left;
-				VDP_drawText("left", 0, 6);
-				len = strlen("left");
-				VDP_clearText(0, 2, len);
-				break;
-
-			case BUTTON_RIGHT:
-				//direction = right;
-				VDP_drawText("right", 0, 7);
-				len = strlen("right");
-				VDP_clearText(0, 3, len);
-				break;
-			}
-		}
-
+        if (changed & ~state & BUTTON_RIGHT)
+        {
+            VDP_drawText("right", 0, 7);
+            len = strlen("right");
+            VDP_clearText(0, 3, len);
+        }
 	}
 }
 
@@ -166,13 +149,16 @@ int main()
 	VDP_loadTileData((const u32 *)tile, TILE1, 1, 0);
 
 	VDPSprite snakeSprite;
-	snakeSprite.x = 128 + screenWidth / 2;
-	snakeSprite.y = 128 + screenHeight / 2;
+	snakeSprite.x = screenWidth / 2;
+	snakeSprite.y = screenHeight / 2;
 	snakeSprite.size = SPRITE_SIZE(1, 1);
 	snakeSprite.attribut = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE1);
 	snakeSprite.link = 0;
 
 	VDP_fillTileMapRect(PLAN_B, TILE_ATTR_FULL(PAL0, 1, 0, 0, TILE1), 0, 0, 64, 64);
+
+    u16 xPosStrLen = 0;
+    u16 yPosStrLen = 0;
 
 	while (1)
 	{
@@ -182,27 +168,31 @@ int main()
 		//update score
 		//draw current screen (logo, start screen, settings, game, gameover, credits...)
 
-		//snakeSprite.y--;
 		steerSnake(&snakeSprite);
 		VDP_setSprite(0, snakeSprite.x, snakeSprite.y, snakeSprite.size, snakeSprite.attribut);
 
-        //VDP_setSpritePosition()
+        char xPosStr[4], yPosStr[4];
 
-		//textofdirection = (char) direction;
-		char textofdirection[1];
-		//strcpy(textofdirection, "0");
-		//strcpy(textofdirection, (char) direction);
-		uintToStr(steer, textofdirection, 1);
-		
+        VDP_clearText(10, 0, xPosStrLen);
+        VDP_clearText(10, 1, yPosStrLen);
 
-		VDP_drawText("test000", 10, 9);
-		VDP_drawText(textofdirection, 10, 10);
+        xPosStrLen = int16ToStr(snakeSprite.x, xPosStr, 0);
+        if (snakeSprite.x < 0) ++xPosStrLen; // temporary fix due to int16ToStr returning only size of number
+        yPosStrLen = int16ToStr(snakeSprite.y, yPosStr, 0);
+        if (snakeSprite.y < 0) ++yPosStrLen;
+
+        VDP_drawText(xPosStr, 10, 0);
+        VDP_drawText(yPosStr, 10, 1);
+
+        char steerStr[4];
+        uintToStr(steer, steerStr, 1);
+
+		VDP_drawText(steerStr, 10, 2);
 
 		VDP_updateSprites(1, TRUE);
 
 		//wait for screen refresh
-		VDP_waitVSync();
-		
+		VDP_waitVSync();	
 	}
 	return (0);
 }
