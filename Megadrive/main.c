@@ -6,9 +6,7 @@
 
 #include "moon.h"
 
-#define TILE1   1
-
-const u32 tile[8] =
+const u32 tileSnake[8] =
 {
 	0x44444444,
 	0x44444444,
@@ -20,7 +18,7 @@ const u32 tile[8] =
 	0x44444444
 };
 
-const u32 tile2[8] =
+const u32 tileFruit[8] =
 {
     0x00111100,
     0x01144110,
@@ -112,26 +110,27 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 	}
 }
 
-void steerSnake(VDPSprite *snakeSprite) {
+void steerSnake(VDPSprite *snakeSprite)
+{
 	JOY_update();
 	//if (steer==direction)
 	
 	if (count > 5) {
 		switch (steer) {
 		case up:
-			snakeSprite->y = snakeSprite->y - 8;
+			snakeSprite->y -= 8;
 			direction = up;
 			break;
 		case down:
-			snakeSprite->y = snakeSprite->y + 8;
+			snakeSprite->y += 8;
 			direction = down;
 			break;
 		case left:
-			snakeSprite->x = snakeSprite->x - 8;
+			snakeSprite->x -= 8;
 			direction = left;
 			break;
 		case right:
-			snakeSprite->x = snakeSprite->x + 8;
+			snakeSprite->x += 8;
 			direction = right;
 			break;
 		}
@@ -141,36 +140,61 @@ void steerSnake(VDPSprite *snakeSprite) {
 
 }
 
+VDPSprite spawnFruit()
+{
+    
+}
+
 int main()
 {
 	JOY_setEventHandler(&myJoyHandler);
 
 	//load the tile in VRAM (check it using GensKMod CPU>Debug>Genesis>VDP)
-	VDP_loadTileData((const u32 *)tile, TILE1, 1, 0);
+	VDP_loadTileData((const u32 *)tileSnake, TILE_USERINDEX, 1, CPU);
+    VDP_loadTileData((const u32 *)tileFruit, TILE_USERINDEX + 1, 1, CPU);
 
 	VDPSprite snakeSprite;
 	snakeSprite.x = screenWidth / 2;
 	snakeSprite.y = screenHeight / 2;
 	snakeSprite.size = SPRITE_SIZE(1, 1);
-	snakeSprite.attribut = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE1);
-	snakeSprite.link = 0;
+	snakeSprite.attribut = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE_USERINDEX);
+	snakeSprite.link = 1;
 
-	VDP_fillTileMapRect(PLAN_B, TILE_ATTR_FULL(PAL0, 1, 0, 0, TILE1), 0, 0, 64, 64);
+    VDPSprite fruitSprite;
+    fruitSprite.x = 8; // off-screen
+    fruitSprite.y = 8;
+    fruitSprite.size = SPRITE_SIZE(1, 1);
+    fruitSprite.attribut = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE_USERINDEX + 1);
+    fruitSprite.link = 0;
+
+    VDP_setSpriteFull(0, snakeSprite.x, snakeSprite.y, snakeSprite.size, snakeSprite.attribut, snakeSprite.link);
+    VDP_setSpriteFull(1, fruitSprite.x, fruitSprite.y, fruitSprite.size, fruitSprite.attribut, fruitSprite.link);
+
+
+	VDP_fillTileMapRect(PLAN_B, TILE_ATTR_FULL(PAL0, 1, 0, 0, TILE_USERINDEX), 0, 0, 64, 64);
 
     u16 xPosStrLen = 0;
     u16 yPosStrLen = 0;
 
 	while (1)
 	{
-	
-		//read input
+        //spawn random fruit
+        //if (!isFruitAlive)
+        //{
+        //    VDPSprite fruitSprite = spawnFruit();
+        //    VDP_setSprite(1, )
+        //}
+
+        //read input
+        steerSnake(&snakeSprite);
+
 		//move sprite
+        VDP_setSpritePosition(0, snakeSprite.x, snakeSprite.y);
+        VDP_updateSprites(2, TRUE);
+
 		//update score
+
 		//draw current screen (logo, start screen, settings, game, gameover, credits...)
-
-		steerSnake(&snakeSprite);
-		VDP_setSprite(0, snakeSprite.x, snakeSprite.y, snakeSprite.size, snakeSprite.attribut);
-
         char xPosStr[4], yPosStr[4];
 
         VDP_clearText(10, 0, xPosStrLen);
@@ -188,8 +212,6 @@ int main()
         uintToStr(steer, steerStr, 1);
 
 		VDP_drawText(steerStr, 10, 2);
-
-		VDP_updateSprites(1, TRUE);
 
 		//wait for screen refresh
 		VDP_waitVSync();	
