@@ -113,7 +113,6 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 void steerSnake(VDPSprite* snakeSprite)
 {
 	JOY_update();
-	//if (steer==direction)
 	
 	if (count > 5) {
 		switch (steer) {
@@ -163,10 +162,15 @@ void updateSnakePosition(VDPSprite* snakeSprite, Vect2D_u16* resolution)
     }
 }
 
-//VDPSprite spawnFruit()
-//{
-//    
-//}
+u8 isSnakeEatFruit(VDPSprite* snakeSprite, VDPSprite* fruitSprite)
+{
+    if ((snakeSprite->x == fruitSprite->x) && (snakeSprite->y == fruitSprite->y))
+    {
+        return TRUE;
+    }
+    
+    return FALSE;
+}
 
 int main()
 {
@@ -188,8 +192,8 @@ int main()
 	snakeSprite.link = 1;
 
     VDPSprite fruitSprite;
-    fruitSprite.x = 8; // off-screen
-    fruitSprite.y = 8;
+    fruitSprite.x = (random() % resolution.x) / 8 * 8;
+    fruitSprite.y = (random() % resolution.y) / 8 * 8;
     fruitSprite.size = SPRITE_SIZE(1, 1);
     fruitSprite.attribut = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE_USERINDEX + 1);
     fruitSprite.link = 0;
@@ -203,21 +207,21 @@ int main()
     u16 xPosStrLen = 0;
     u16 yPosStrLen = 0;
 
-	while (1)
+	while (TRUE)
 	{
-        //spawn random fruit
-        //if (!isFruitAlive)
-        //{
-        //    VDPSprite fruitSprite = spawnFruit();
-        //    VDP_setSprite(1, )
-        //}
-
         //read input
         steerSnake(&snakeSprite);
 
 		//move sprite
         updateSnakePosition(&snakeSprite, &resolution);
 
+        //check collision
+        if (isSnakeEatFruit(&snakeSprite, &fruitSprite))
+        {
+            fruitSprite.x = (random() % resolution.x) / 8 * 8;
+            fruitSprite.y = (random() % resolution.y) / 8 * 8;
+            VDP_setSpritePosition(1, fruitSprite.x, fruitSprite.y);
+        }
 
         //update sprites
         VDP_setSpritePosition(0, snakeSprite.x, snakeSprite.y);
