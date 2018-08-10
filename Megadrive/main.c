@@ -110,7 +110,7 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 	}
 }
 
-void steerSnake(VDPSprite *snakeSprite)
+void steerSnake(VDPSprite* snakeSprite)
 {
 	JOY_update();
 	//if (steer==direction)
@@ -136,14 +136,37 @@ void steerSnake(VDPSprite *snakeSprite)
 		}
 		count = 0;
 	}
-	else count++;
+	else ++count;
 
 }
 
-VDPSprite spawnFruit()
+void updateSnakePosition(VDPSprite* snakeSprite)
 {
-    
+    if (snakeSprite->x >= 320)
+    {
+        snakeSprite->x = snakeSprite->x % 320;
+    }
+    else if (snakeSprite->x < 0)
+    {
+        // % operator is remainder and so neg - not like modulus
+        snakeSprite->x = 320 + (snakeSprite->x % 320);
+    }
+
+    if (snakeSprite->y >= 224)
+    {
+        snakeSprite->y = snakeSprite->y % 224;
+    }
+    else if (snakeSprite->y < 0)
+    {
+        // % operator is remainder and so neg - not like modulus
+        snakeSprite->y = 224 + (snakeSprite->y % 224);
+    }
 }
+
+//VDPSprite spawnFruit()
+//{
+//    
+//}
 
 int main()
 {
@@ -189,6 +212,8 @@ int main()
         steerSnake(&snakeSprite);
 
 		//move sprite
+        updateSnakePosition(&snakeSprite);
+
         VDP_setSpritePosition(0, snakeSprite.x, snakeSprite.y);
         VDP_updateSprites(2, TRUE);
 
@@ -208,7 +233,7 @@ int main()
         VDP_drawText(xPosStr, 10, 0);
         VDP_drawText(yPosStr, 10, 1);
 
-        char steerStr[4];
+        char steerStr[2];
         uintToStr(steer, steerStr, 1);
 
 		VDP_drawText(steerStr, 10, 2);
