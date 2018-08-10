@@ -140,26 +140,26 @@ void steerSnake(VDPSprite* snakeSprite)
 
 }
 
-void updateSnakePosition(VDPSprite* snakeSprite)
+void updateSnakePosition(VDPSprite* snakeSprite, Vect2D_u16* resolution)
 {
-    if (snakeSprite->x >= 320)
+    if (snakeSprite->x >= resolution->x)
     {
-        snakeSprite->x = snakeSprite->x % 320;
+        snakeSprite->x = snakeSprite->x % resolution->x;
     }
     else if (snakeSprite->x < 0)
     {
         // % operator is remainder and so neg - not like modulus
-        snakeSprite->x = 320 + (snakeSprite->x % 320);
+        snakeSprite->x = resolution->x + (snakeSprite->x % resolution->x);
     }
 
-    if (snakeSprite->y >= 224)
+    if (snakeSprite->y >= resolution->y)
     {
-        snakeSprite->y = snakeSprite->y % 224;
+        snakeSprite->y = snakeSprite->y % resolution->y;
     }
     else if (snakeSprite->y < 0)
     {
         // % operator is remainder and so neg - not like modulus
-        snakeSprite->y = 224 + (snakeSprite->y % 224);
+        snakeSprite->y = resolution->y + (snakeSprite->y % resolution->y);
     }
 }
 
@@ -170,6 +170,10 @@ void updateSnakePosition(VDPSprite* snakeSprite)
 
 int main()
 {
+    Vect2D_u16 resolution;
+    resolution.x = VDP_getScreenWidth();
+    resolution.y = VDP_getScreenHeight();
+
 	JOY_setEventHandler(&myJoyHandler);
 
 	//load the tile in VRAM (check it using GensKMod CPU>Debug>Genesis>VDP)
@@ -212,8 +216,10 @@ int main()
         steerSnake(&snakeSprite);
 
 		//move sprite
-        updateSnakePosition(&snakeSprite);
+        updateSnakePosition(&snakeSprite, &resolution);
 
+
+        //update sprites
         VDP_setSpritePosition(0, snakeSprite.x, snakeSprite.y);
         VDP_updateSprites(2, TRUE);
 
