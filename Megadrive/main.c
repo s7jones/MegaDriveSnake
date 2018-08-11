@@ -207,6 +207,8 @@ int main()
     u16 xPosStrLen = 0;
     u16 yPosStrLen = 0;
 
+    u16 score = 0;
+
 	while (TRUE)
 	{
         //read input
@@ -221,15 +223,21 @@ int main()
             fruitSprite.x = (random() % resolution.x) / 8 * 8;
             fruitSprite.y = (random() % resolution.y) / 8 * 8;
             VDP_setSpritePosition(1, fruitSprite.x, fruitSprite.y);
+            
+            //update score
+            ++score;
         }
 
         //update sprites
         VDP_setSpritePosition(0, snakeSprite.x, snakeSprite.y);
         VDP_updateSprites(2, TRUE);
 
-		//update score
-
 		//draw current screen (logo, start screen, settings, game, gameover, credits...)
+        char scoreStr[10];
+        int16ToStr(score, scoreStr, 0);
+        VDP_drawText("Score:", 20, 0);
+        VDP_drawText(scoreStr, 30, 0);
+        
         char xPosStr[4], yPosStr[4];
 
         VDP_clearText(10, 0, xPosStrLen);
