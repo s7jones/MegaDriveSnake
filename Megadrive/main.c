@@ -238,15 +238,19 @@ int main()
         VDP_drawText("Score:", 20, 0);
         VDP_drawText(scoreStr, 30, 0);
         
-        char xPosStr[4], yPosStr[4];
-
-        VDP_clearText(10, 0, xPosStrLen);
-        VDP_clearText(10, 1, yPosStrLen);
+        char xPosStr[5], yPosStr[5];
+        xPosStr[0] = yPosStr[0] = ' ';
+        xPosStr[1] = yPosStr[1] = ' ';
+        xPosStr[2] = yPosStr[2] = ' ';
+        xPosStr[3] = yPosStr[3] = ' ';
+        xPosStr[4] = yPosStr[4] = 0;
 
         xPosStrLen = int16ToStr(snakeSprite.x, xPosStr, 0);
         if (snakeSprite.x < 0) ++xPosStrLen; // temporary fix due to int16ToStr returning only size of number
         yPosStrLen = int16ToStr(snakeSprite.y, yPosStr, 0);
         if (snakeSprite.y < 0) ++yPosStrLen;
+        xPosStr[xPosStrLen] = ' ';
+        yPosStr[yPosStrLen] = ' ';
 
         VDP_drawText(xPosStr, 10, 0);
         VDP_drawText(yPosStr, 10, 1);
