@@ -110,26 +110,26 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 	}
 }
 
-void steerSnake(VDPSprite* snakeSprite)
+void steerSnake(Vect2D_u16* snakeHead)
 {
 	JOY_update();
 	
 	if (count > 5) {
 		switch (steer) {
 		case up:
-			snakeSprite->y -= 8;
+			snakeHead->y -= 8;
 			direction = up;
 			break;
 		case down:
-			snakeSprite->y += 8;
+			snakeHead->y += 8;
 			direction = down;
 			break;
 		case left:
-			snakeSprite->x -= 8;
+			snakeHead->x -= 8;
 			direction = left;
 			break;
 		case right:
-			snakeSprite->x += 8;
+			snakeHead->x += 8;
 			direction = right;
 			break;
 		}
@@ -139,32 +139,32 @@ void steerSnake(VDPSprite* snakeSprite)
 
 }
 
-void updateSnakePosition(VDPSprite* snakeSprite, Vect2D_u16* resolution)
+void updateSnakePosition(Vect2D_u16* snakeHead, Vect2D_u16* resolution)
 {
-    if (snakeSprite->x >= resolution->x)
+    if (snakeHead->x >= resolution->x)
     {
-        snakeSprite->x = snakeSprite->x % resolution->x;
+        snakeHead->x = snakeHead->x % resolution->x;
     }
-    else if (snakeSprite->x < 0)
+    else if (snakeHead->x < 0)
     {
         // % operator is remainder and so neg - not like modulus
-        snakeSprite->x = resolution->x + (snakeSprite->x % resolution->x);
+        snakeHead->x = resolution->x + (snakeHead->x % resolution->x);
     }
 
-    if (snakeSprite->y >= resolution->y)
+    if (snakeHead->y >= resolution->y)
     {
-        snakeSprite->y = snakeSprite->y % resolution->y;
+        snakeHead->y = snakeHead->y % resolution->y;
     }
-    else if (snakeSprite->y < 0)
+    else if (snakeHead->y < 0)
     {
         // % operator is remainder and so neg - not like modulus
-        snakeSprite->y = resolution->y + (snakeSprite->y % resolution->y);
+        snakeHead->y = resolution->y + (snakeHead->y % resolution->y);
     }
 }
 
-u8 isSnakeEatFruit(VDPSprite* snakeSprite, VDPSprite* fruitSprite)
+u8 isSnakeEatFruit(Vect2D_u16* snakeHead, Vect2D_u16* fruit)
 {
-    if ((snakeSprite->x == fruitSprite->x) && (snakeSprite->y == fruitSprite->y))
+    if ((snakeHead->x == fruit->x) && (snakeHead->y == fruit->y))
     {
         return TRUE;
     }
@@ -178,59 +178,70 @@ int main()
     resolution.x = VDP_getScreenWidth();
     resolution.y = VDP_getScreenHeight();
 
+    u16 xPosStrLen = 0;
+    u16 yPosStrLen = 0;
+
+    u16 score = 0;
+
+    Vect2D_u16 snakeLastPosition;
+    snakeLastPosition.x = 0;
+    snakeLastPosition.y = 0;
+
+    Vect2D_u16 snakeHead;
+    snakeHead.x = (screenWidth / 2) / 8 * 8;
+    snakeHead.y = (screenHeight / 2) / 8 * 8;
+
+    Vect2D_u16 fruit;
+    fruit.x = (random() % screenWidth) / 8 * 8;
+    fruit.y = (random() % screenHeight) / 8 * 8;
+
+    /*
+    Colour tricks from Tiago
+           R     G     B
+    [xxxx][***x][***x][***x]
+    */
+
+    VDP_setPaletteColor(0, 0x2a2);
+    //VDP_setBackgroundColor(37);
+
 	JOY_setEventHandler(&myJoyHandler);
 
 	//load the tile in VRAM (check it using GensKMod CPU>Debug>Genesis>VDP)
 	VDP_loadTileData((const u32 *)tileSnake, TILE_USERINDEX, 1, CPU);
     VDP_loadTileData((const u32 *)tileFruit, TILE_USERINDEX + 1, 1, CPU);
 
-	VDPSprite snakeSprite;
-	snakeSprite.x = screenWidth / 2;
-	snakeSprite.y = screenHeight / 2;
-	snakeSprite.size = SPRITE_SIZE(1, 1);
-	snakeSprite.attribut = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE_USERINDEX);
-	snakeSprite.link = 1;
-
-    VDPSprite fruitSprite;
-    fruitSprite.x = (random() % resolution.x) / 8 * 8;
-    fruitSprite.y = (random() % resolution.y) / 8 * 8;
-    fruitSprite.size = SPRITE_SIZE(1, 1);
-    fruitSprite.attribut = TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE_USERINDEX + 1);
-    fruitSprite.link = 0;
-
-    VDP_setSpriteFull(0, snakeSprite.x, snakeSprite.y, snakeSprite.size, snakeSprite.attribut, snakeSprite.link);
-    VDP_setSpriteFull(1, fruitSprite.x, fruitSprite.y, fruitSprite.size, fruitSprite.attribut, fruitSprite.link);
+    VDP_setTileMapXY(PLAN_B, TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE_USERINDEX + 1), fruit.x / 8, fruit.y / 8);
 
 
-	VDP_fillTileMapRect(PLAN_B, TILE_ATTR_FULL(PAL0, 1, 0, 0, TILE_USERINDEX), 0, 0, 64, 64);
-
-    u16 xPosStrLen = 0;
-    u16 yPosStrLen = 0;
-
-    u16 score = 0;
+	//VDP_fillTileMapRect(PLAN_A, TILE_ATTR_FULL(PAL0, 0, 0, 0, TILE_USERINDEX), 0, 0, 64, 64);
 
 	while (TRUE)
 	{
         //read input
-        steerSnake(&snakeSprite);
+        steerSnake(&snakeHead);
 
 		//move sprite
-        updateSnakePosition(&snakeSprite, &resolution);
+        updateSnakePosition(&snakeHead, &resolution);
 
         //check collision
-        if (isSnakeEatFruit(&snakeSprite, &fruitSprite))
+        if (isSnakeEatFruit(&snakeHead, &fruit))
         {
-            fruitSprite.x = (random() % resolution.x) / 8 * 8;
-            fruitSprite.y = (random() % resolution.y) / 8 * 8;
-            VDP_setSpritePosition(1, fruitSprite.x, fruitSprite.y);
+            fruit.x = (random() % resolution.x) / 8 * 8;
+            fruit.y = (random() % resolution.y) / 8 * 8;
+
+            VDP_setTileMapXY(PLAN_B, TILE_ATTR_FULL(PAL1, 1, 0, 0, TILE_USERINDEX + 1), fruit.x / 8, fruit.y / 8);
             
             //update score
             ++score;
         }
 
         //update sprites
-        VDP_setSpritePosition(0, snakeSprite.x, snakeSprite.y);
-        VDP_updateSprites(2, TRUE);
+
+        VDP_setTileMapXY(PLAN_B, TILE_ATTR_FULL(PAL0, 0, 0, 0, 0), snakeLastPosition.x, snakeLastPosition.y);
+        VDP_setTileMapXY(PLAN_B, TILE_ATTR_FULL(PAL3, 1, 0, 0, TILE_USERINDEX), snakeHead.x / 8, snakeHead.y / 8);
+
+        snakeLastPosition.x = snakeHead.x / 8;
+        snakeLastPosition.y = snakeHead.y / 8;
 
 		//draw current screen (logo, start screen, settings, game, gameover, credits...)
         char scoreStr[10];
@@ -245,10 +256,10 @@ int main()
         xPosStr[3] = yPosStr[3] = ' ';
         xPosStr[4] = yPosStr[4] = 0;
 
-        xPosStrLen = int16ToStr(snakeSprite.x, xPosStr, 0);
-        if (snakeSprite.x < 0) ++xPosStrLen; // temporary fix due to int16ToStr returning only size of number
-        yPosStrLen = int16ToStr(snakeSprite.y, yPosStr, 0);
-        if (snakeSprite.y < 0) ++yPosStrLen;
+        xPosStrLen = int16ToStr(snakeHead.x, xPosStr, 0);
+        if (snakeHead.x < 0) ++xPosStrLen; // temporary fix due to int16ToStr returning only size of number
+        yPosStrLen = int16ToStr(snakeHead.y, yPosStr, 0);
+        if (snakeHead.y < 0) ++yPosStrLen;
         xPosStr[xPosStrLen] = ' ';
         yPosStr[yPosStrLen] = ' ';
 
