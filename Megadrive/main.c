@@ -110,7 +110,7 @@ void myJoyHandler(u16 joy, u16 changed, u16 state)
 	}
 }
 
-void steerSnake(Vect2D_u16* snakeHead)
+void steerSnake(Vect2D_s16* snakeHead)
 {
 	JOY_update();
 	
@@ -139,7 +139,7 @@ void steerSnake(Vect2D_u16* snakeHead)
 
 }
 
-void updateSnakePosition(Vect2D_u16* snakeHead, Vect2D_u16* resolution)
+void updateSnakePosition(Vect2D_s16* snakeHead, Vect2D_u16* resolution)
 {
     if (snakeHead->x >= resolution->x)
     {
@@ -162,7 +162,7 @@ void updateSnakePosition(Vect2D_u16* snakeHead, Vect2D_u16* resolution)
     }
 }
 
-u8 isSnakeEatFruit(Vect2D_u16* snakeHead, Vect2D_u16* fruit)
+u8 isSnakeEatFruit(Vect2D_s16* snakeHead, Vect2D_u16* fruit)
 {
     if ((snakeHead->x == fruit->x) && (snakeHead->y == fruit->y))
     {
@@ -183,11 +183,11 @@ int main()
 
     u16 score = 0;
 
-    Vect2D_u16 snakeLastPosition;
+    Vect2D_s16 snakeLastPosition;
     snakeLastPosition.x = 0;
     snakeLastPosition.y = 0;
 
-    Vect2D_u16 snakeHead;
+    Vect2D_s16 snakeHead;
     snakeHead.x = (screenWidth / 2) / 8 * 8;
     snakeHead.y = (screenHeight / 2) / 8 * 8;
 
